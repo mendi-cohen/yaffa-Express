@@ -10,6 +10,6 @@ const sequelize = new Sequelize(process.env.DATABASE, process.env.USER, process.
 
 });
 
-sequelize.sync({force: true});
+sequelize.sync({});
 
 export default sequelize;

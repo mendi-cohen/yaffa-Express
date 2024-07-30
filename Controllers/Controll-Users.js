@@ -26,14 +26,14 @@ class UsersControll{
     // הרשמה 
     
 
-    async sign_in(req, res) {
+    async sign_up(req, res) {
       try {
           // בדיקה אם האימייל כבר קיים במערכת
-          const existingUser = await Users_M.fineByEmail(req.body.email);
-          if (existingUser) {
-              console.log("Email already exists");
-              return res.status(409).json({ error: "Email already exists" });
-          }
+          // const existingUser = await Users_M.fineByEmail(req.body.email);
+          // if (existingUser) {
+          //     console.log("Email already exists");
+          //     return res.status(409).json({ error: "Email already exists" });
+          // }
           // הצפנת הסיסמה
           const hashedPassword = await hashPassword(req.body.password);
           // שמירת המשתמש עם הסיסמה המוצפנת
@@ -48,7 +48,7 @@ class UsersControll{
 
 /// התחברות 
 
-async loginUser(req, res) {
+async login(req, res) {
   try {
       const { password ,email} = req.body;
       // בודקים אם הסיסמה התקבלה
@@ -71,7 +71,7 @@ async loginUser(req, res) {
       const token = jsonwebtoken.sign(payload, process.env.SECRET_KEY, { expiresIn: '10m' });
 
       // הוספת פרטי המשתמש לתגובה
-      const userDetails = {id:user.id, name: user.userName, email: user.email }; 
+      const userDetails = {id:user.id, name: user.FirstName, email: user.email }; 
       res.status(200).json({ success: "התחברות הצליחה", token, user: userDetails }); 
 
   } catch (error) {

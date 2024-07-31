@@ -13,7 +13,7 @@ class UsersControll{
     
     async Allusers (req, res){
       try {
-        const [usersFdb ,_] = await Users_M.getUsers() 
+        const usersFdb = await Users_M.getUsers() 
         res.json({usersFdb})
 
       } catch (error) {
@@ -29,11 +29,11 @@ class UsersControll{
     async sign_up(req, res) {
       try {
           // בדיקה אם האימייל כבר קיים במערכת
-          // const existingUser = await Users_M.fineByEmail(req.body.email);
-          // if (existingUser) {
-          //     console.log("Email already exists");
-          //     return res.status(409).json({ error: "Email already exists" });
-          // }
+          const existingUser = await Users_M.fineByEmail(req.body.email);
+          if (existingUser) {
+              console.log("Email already exists");
+              return res.status(409).json({ error: "Email already exists" });
+          }
           // הצפנת הסיסמה
           const hashedPassword = await hashPassword(req.body.password);
           // שמירת המשתמש עם הסיסמה המוצפנת
@@ -48,7 +48,7 @@ class UsersControll{
 
 /// התחברות 
 
-async login(req, res) {
+async log_in(req, res) {
   try {
       const { password ,email} = req.body;
       // בודקים אם הסיסמה התקבלה

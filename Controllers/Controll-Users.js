@@ -1,6 +1,7 @@
 import Users_M from '../Models/options/Options-Users.js';
 import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
+import cookie from 'cookie-parser';
 
 // פונקציה להצפנת הסיסמה
 async function hashPassword(password) {
@@ -50,35 +51,60 @@ class UsersControll{
 
 async log_in(req, res) {
   try {
-      const { password ,email} = req.body;
-      // בודקים אם הסיסמה התקבלה
+      const { password, email } = req.body;
+
+      // בודקים אם הסיסמה או האימייל התקבלו
       if (!password || !email) {
-          return res.status(400).json({ error: "Password is required!!!!" });
+          return res.status(400).json({ error: "Password and email are required!" });
       }
+
       // מוצאים את כל המשתמשים מהבסיס נתונים
       const allUsers = await Users_M.getUsers();
-      
+
       if (!allUsers || allUsers.length === 0) {
-          return res.status(404).json({ error: "לא נמצאו משתמשים בבסיס הנתונים עם הסיסמה הנתונה" });
+          return res.status(404).json({ error: "No users found in the database with the provided credentials." });
       }
-      // בודקים אם יש משתמש שהסיסמה שווה לסיסמה שהתקבלה בבקשה
+
+      // בודקים אם יש משתמש עם האימייל והסיסמה שהתקבלו בבקשה
       const user = allUsers.find(user => user.email === email && bcrypt.compareSync(password, user.password));
       if (!user) {
-          return res.status(401).json({ error: "סיסמה לא חוקית" });
+          return res.status(401).json({ error: "Invalid email or password." });
       }
-      // אם הסיסמה נכונה, יוצרים טוקן JWT ומחזירים אותו
+
+      // אם הסיסמה נכונה, יוצרים טוקן JWT
       const payload = { userId: user.id, userEmail: user.email };
       const token = jsonwebtoken.sign(payload, process.env.SECRET_KEY, { expiresIn: '10m' });
 
       // הוספת פרטי המשתמש לתגובה
-      const userDetails = {id:user.id, name: user.FirstName, email: user.email }; 
-      res.status(200).json({ success: "התחברות הצליחה", token, user: userDetails }); 
+      const userDetails = { id: user.id, name: user.FirstName, email: user.email }; 
+
+      // הגדרת העוגיות לפני שליחת התגובה
+      res.cookie('authToken', token, { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 600000,
+         signed: true  // 10 דקות
+      });
+      
+      res.cookie('userData', JSON.stringify(userDetails), { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 600000,
+        signed: true 
+      });
+      console.log('Cookies:', res.get('Set-Cookie'));
+      
+    
+
+      // שליחת התגובה אחרי הגדרת העוגיות
+      res.status(200).json({ success: "Login successful", token, user: userDetails });
 
   } catch (error) {
       console.error('Error logging in:', error);
-      res.status(500).json({ "error": "שגיאה פנימית בשרת" });
+      res.status(500).json({ "error": "Internal server error" });
   }
 }
+
 
 
  

@@ -1,13 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookie from 'cookie-parser';
 import users from './Routers/Router-Users.js';
+
 
 const app = express();
 dotenv.config();
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookie(process.env.COOKIE_SECRET));
+const corsOptions = {
+    origin: process.env.ALLOWED_ORIGIN || '*',
+    credentials: true,
+  };
+app.use(cors(corsOptions));
+
 
 //Routers
 app.use('/users' ,users);

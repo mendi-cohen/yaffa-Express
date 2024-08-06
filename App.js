@@ -10,11 +10,8 @@ dotenv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookie(process.env.COOKIE_SECRET));
-const corsOptions = {
-    origin: process.env.ALLOWED_ORIGIN || '*',
-    credentials: true,
-  };
-app.use(cors(corsOptions));
+
+app.use(cors());
 
 
 //Routers

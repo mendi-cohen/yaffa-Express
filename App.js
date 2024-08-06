@@ -2,9 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookie from 'cookie-parser';
-
 import users from './Routers/Router-Users.js';
-import cookieConfig from './middleWare/Cookie.js';
+
 
 const app = express();
 dotenv.config();
@@ -16,7 +15,7 @@ const corsOptions = {
     credentials: true,
   };
 app.use(cors(corsOptions));
-app.use(cookieConfig);
+
 
 //Routers
 app.use('/users' ,users);

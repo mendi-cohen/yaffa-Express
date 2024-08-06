@@ -17,12 +17,13 @@ class Users{
       return error;
     }
   }
-  async fineByEmail(email){
+  async fineByEmail(email) {
     return await User.findOne({
-    where:{
-      email:email,
-    }
-  })
+      where: {
+        email: email,
+      },
+      attributes: { exclude: ['password'] } 
+    });
   }
 
   async findByPassword(password) {

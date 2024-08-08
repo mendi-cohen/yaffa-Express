@@ -89,24 +89,7 @@ class UsersControll {
         email: user.email,
       };
 
-      // הגדרת העוגיות לפני שליחת התגובה
-      res.cookie("authToken", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-      });
-
-      res.cookie("userData", JSON.stringify(userDetails), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 600000,
-      });
-
-      console.log("Cookies:", res.get("Set-Cookie"));
-
-      // שליחת התגובה אחרי הגדרת העוגיות
-      res
-        .status(200)
+      res.status(200)
         .json({ success: "Login successful", token, user: userDetails });
     } catch (error) {
       console.error("Error logging in:", error);
@@ -120,7 +103,7 @@ class UsersControll {
 
   async CheckAuth(req, res) {
     try {
-      const token = req.cookies.authToken;
+      const token = req.authToken;
 
       if (!token) {
         return res

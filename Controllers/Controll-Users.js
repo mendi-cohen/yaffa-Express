@@ -79,7 +79,8 @@ class UsersControll {
       // אם הסיסמה נכונה, יוצרים טוקן JWT
       const payload = { userId: user.id, userEmail: user.email };
       const token = jsonwebtoken.sign(payload, process.env.SECRET_KEY, {
-        expiresIn: "10m",
+        expiresIn: "30s", //sssssssssssssssssssssseeeeeeeeeeeeeeeeccccccccccccccccoooooonnnnnnnnnnddddddddd!!!!!!!!!!!!!!!!!!ולא לא עדכנתי את שלום
+
       });
 
       // הוספת פרטי המשתמש לתגובה
@@ -87,6 +88,7 @@ class UsersControll {
         id: user.id,
         name: user.FirstName,
         email: user.email,
+        rule: user.rule,
       };
 
       res.status(200)
@@ -103,54 +105,59 @@ class UsersControll {
 
   async CheckAuth(req, res) {
     try {
-      const token = req.authToken;
-
-      if (!token) {
+      // קבלת הטוקן מה-Authorization Header
+      const authHeader = req.headers.authorization;
+      console.log(authHeader);
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res
           .status(401)
-          .json({ isAuthenticated: false, message: "No token found" });
+          .json({ isAuthenticated: false, message: "No token founddddd" });
       }
-
+  
+      // חילוץ הטוקן מתוך ה-Authorization Header
+      const token = authHeader.split(' ')[1];
+  
       // פענוח הטוקן
       const decoded = jsonwebtoken.verify(token, process.env.SECRET_KEY);
-      console.log(decoded);
+  
       // בדיקה אם המשתמש קיים במסד הנתונים
       const user = await Users_M.fineByEmail(decoded.userEmail);
-
+  
       if (!user) {
         return res
           .status(401)
           .json({ isAuthenticated: false, message: "User not found" });
       }
-
-      // החזרת מידע על המשתמש המאומת
+  
       res.json({
         isAuthenticated: true,
         user: {
           id: user.id,
           name: user.FirstName,
           email: user.email,
-          // הוסף כאן שדות נוספים לפי הצורך
+          rule: user.rule
         },
       });
     } catch (error) {
       console.error("Error in checkAuth:", error);
-
+  
       if (error.name === "JsonWebTokenError") {
         return res
           .status(401)
           .json({ isAuthenticated: false, message: "Invalid token" });
       }
-
+  
       if (error.name === "TokenExpiredError") {
         return res
           .status(401)
           .json({ isAuthenticated: false, message: "Token expired" });
       }
-
+  
       res.status(500).json({ isAuthenticated: false, message: "Server error" });
     }
   }
+  
 }
 
 export default new UsersControll();
